@@ -11,10 +11,11 @@ struct ContentView: View {
     
     @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Monaco", "Nigeria", "Poland", "Spain", "UK", "Ukraine", "US"].shuffled()
     @State private var randomCountry = Int.random(in: 0...2)
-    
     @State private var showAlert = false
     @State private var scoreTitle = ""
+    @State private var messageTitle = ""
     @State private var userScore = 0
+    @State private var gameRounds = 0
     
     var body: some View {
         ZStack {
@@ -34,7 +35,7 @@ struct ContentView: View {
                         Text("Tap the Country")
                             .foregroundStyle(.secondary)
                             .font(.subheadline.weight(.heavy))
-                        Text("\(countries[randomCountry])")
+                        Text(countries[randomCountry])
                             .foregroundStyle(.secondary)
                             .font(.largeTitle.weight(.semibold))
                     }
@@ -64,27 +65,39 @@ struct ContentView: View {
         .alert(scoreTitle, isPresented: $showAlert) {
             Button("Continue", action: askQuestion)
         } message: {
-            Text("Your score is \(userScore)")
+            Text("\(messageTitle)")
         }
     }
     func flaggedTapped(_ number: Int) {
-        if number == randomCountry {
-            scoreTitle = "Right Answer"
-            userScore += 1
-        } else {
-            scoreTitle = "Wrong Answer"
-            if userScore == 0 {
-                userScore = 0 
+            if number == randomCountry {
+                scoreTitle = "Right Answer!"
+                userScore += 1
+                messageTitle = "Your score is \(userScore)"
+                gameRounds += 1
             } else {
-                userScore -= 1
+                scoreTitle = "Wrong! that's the flag of \(countries[number])"
+                gameRounds += 1
+                if userScore == 0 {
+                    userScore = 0
+                    messageTitle = "Your score is \(userScore)"
+                } else {
+                    userScore -= 1
+                    messageTitle = "Your score is \(userScore)"
+                }
             }
-        }
+            if gameRounds == 8 {
+                scoreTitle = "Game finished"
+                messageTitle = "Restart Game, Final Score is \(userScore)!"
+            }
         showAlert = true
     }
     
     func askQuestion() {
         countries.shuffle()
         randomCountry = Int.random(in: 0...2)
+        if (gameRounds == 8) {
+            userScore = 0
+        }
     }
 }
 
